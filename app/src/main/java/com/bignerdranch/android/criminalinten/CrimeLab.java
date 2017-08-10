@@ -1,6 +1,9 @@
 package com.bignerdranch.android.criminalinten;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+
+import com.bignerdranch.android.criminalinten.database.CrimeBaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +16,9 @@ import java.util.UUID;
 public class CrimeLab {
     private static CrimeLab sCrimeLab;
 
-    private List<Crime> mCrimes;
+    private Context mContext;
+    private SQLiteDatabase mDatabase;
+
 
     public static CrimeLab get(Context context) {
         if (sCrimeLab == null) {
@@ -23,31 +28,21 @@ public class CrimeLab {
     }
 
     private CrimeLab(Context context) {
-        mCrimes = new ArrayList<>();
+        mContext = context.getApplicationContext();
+        mDatabase = new CrimeBaseHelper(mContext).getWritableDatabase();
     }
 
     public Crime getCrime(UUID id) {
-        for (Crime crime : mCrimes) {
-            if (crime.getId().equals(id)) {
-                return crime;
-            }
-        }
         return null;
     }
 
     public void addCrime(Crime newCrime) {
-        mCrimes.add(newCrime);
     }
 
     public List<Crime> getCrimes() {
-        return mCrimes;
-    }
-
-    public void setCrimes(List<Crime> crimes) {
-        mCrimes = crimes;
+        return new ArrayList<>();
     }
 
     public void delete(Crime crime) {
-        mCrimes.remove(crime);
     }
 }
