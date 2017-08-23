@@ -2,6 +2,7 @@ package com.bignerdranch.android.criminalinten;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -44,6 +45,8 @@ public class CrimeFragment extends Fragment {
     private static final int REQUEST_DATE = 0;
     private static final int REQUEST_CONTACT = 1;
     private static final int REQUEST_PHOTO = 2;
+
+    private Callbacks mCallbacks;
 
     private Crime mCrime;
     private File mPhotoFile;
@@ -88,6 +91,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 mCrime.setTitle(charSequence.toString());
+                updateCrime();
             }
 
             @Override
@@ -112,6 +116,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                updateCrime();
             }
         });
         mReportButton = view.findViewById(R.id.crime_report);
@@ -173,6 +178,7 @@ public class CrimeFragment extends Fragment {
         if (requestCode == REQUEST_DATE) {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             mCrime.setDate(date);
+            updateCrime();
             updateDate();
         }
         if (requestCode == REQUEST_CONTACT && data != null) {
@@ -193,6 +199,7 @@ public class CrimeFragment extends Fragment {
                 c.moveToFirst();
                 String suspect = c.getString(0);
                 mCrime.setSuspect(suspect);
+                updateCrime();
                 mSuspectButton.setText(suspect);
             } finally {
                 c.close();
@@ -200,6 +207,7 @@ public class CrimeFragment extends Fragment {
         } else if (requestCode == REQUEST_PHOTO) {
             Uri uri = FileProvider.getUriForFile(getActivity(), "com.bignerdranch.android.criminalinten.fileprovider", mPhotoFile);
             getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            updateCrime();
             updatePhotoView();
         }
     }
@@ -228,6 +236,21 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onAttach(Context context) {
+        mCallbacks = (Callbacks) context;
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
 
     private void updateDate() {
         mDateButton.setText(mCrime.getDate().toString());
@@ -259,5 +282,10 @@ public class CrimeFragment extends Fragment {
             Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
             mPhotoView.setImageBitmap(bitmap);
         }
+    }
+
+    private void updateCrime() {
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
     }
 }
