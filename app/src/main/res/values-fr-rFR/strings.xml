@@ -22,4 +22,7 @@
     <string name="crime_report_suspect">le suspect est %s.</string>
     <string name="crime_report_subject">IntentionsCriminels Rapport de Crime</string>
     <string name="send_report">Envoi du rapport du crime via</string>
+    <string name="crime_photo_button_description">Take photo of crime scene</string>
+    <string name="crime_photo_no_image_description">Crime scene photo (not set)</string>
+    <string name="crime_photo_image_description">Crime scene photo (set)</string>
 </resources>
